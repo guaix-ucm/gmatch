@@ -62,3 +62,34 @@ for i in range(l):
                 tl2.append(tng)
 
 print len(tl1), len(tl2)
+
+first = tl1[0]
+
+def naive_match(tg1, tg2):
+    R1 = tg1[5]
+    tR1 = tg1[6]
+    C1 = tg1[7]
+    tC1 = tg1[8]
+    R2 = tg2[5]
+    tR2 = tg2[6]
+    C2 = tg2[7]
+    tC2 = tg2[8]
+
+    sen1 = (R1 - R2)**2 - tR1**2 - tR2**2
+
+    if sen1 > 0:
+        return None
+
+    sen2 = (C1 - C2)**2 - tC1**2 - tC2**2
+
+    if sen2 > 0:
+        return None
+
+    return sen1, sen2
+
+
+for first in tl1:
+    for tl in tl2:
+        m = naive_match(first, tl)
+        if m is not None:
+            print m
