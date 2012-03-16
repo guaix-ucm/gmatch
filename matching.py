@@ -32,35 +32,33 @@ def normaliza(a):
 
     return b
 
-def build(a1, a2, a3):
-    print a1, a2, a3
-    idx = ["12", "13", "23"]
-    r = numpy.array([a1, a2, a3])
+reject_scale = 10.0
 
-    dist = numpy.triu(distance.cdist(r, r))
-    r = dist[dist>0]
-    print r
-    i1=r.argmax()
-    print i1, idx[i1]
-    r[i1] = 0
-    i1=r.argmax()
-    print i1, idx[i1]
-    r[i1] = 0
-    i1=r.argmax()
-    print i1, idx[i1]
-    r[i1] = 0
-    sys.exit(0)
+common = min(cat1s.shape[0], cat2s.shape[0])
+print common
 
-a = normaliza(cat1s)
-l = cat1s.shape[0]
-tl = []
+a = normaliza(cat1s[:common,:])
+l = common
+tl1 = []
 for i in range(l):
     for j in range(i + 1, l):
         for k in range(j + 1, l):
             r = a[[i,j,k], :]
-            tl.append(triangle.create_triang(r))
+            tng = triangle.create_triang(r)
+            # if scale R > reject_scale, reject
+            if tng[5] < reject_scale:
+                tl1.append(tng)
 
-print len(tl)
+a = normaliza(cat2s[:common,:])
+l = common
+tl2 = []
+for i in range(l):
+    for j in range(i + 1, l):
+        for k in range(j + 1, l):
+            r = a[[i,j,k], :]
+            tng = triangle.create_triang(r)
+            # if scale R > reject_scale, reject
+            if tng[5] < reject_scale:
+                tl2.append(tng)
 
-
-#print normaliza(cat1s)
+print len(tl1), len(tl2)
