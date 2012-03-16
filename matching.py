@@ -37,7 +37,7 @@ cat2s = sort_by_mag(cat2)
 reject_scale = 10.0
 
 common = min(cat1s.shape[0], cat2s.shape[0])
-common = 5
+#common = 10
 print 'Number of points', common
 
 a = cat1s[:common,:]
@@ -49,6 +49,11 @@ for idx in itertools.combinations(range(common), 3):
     # if scale R > reject_scale, reject
     if tng[5] < reject_scale:
         tl1.append(tng)
+    else:
+        print 'reject'
+
+for tl in tl1:
+    print tl
 
 #a = normaliza(cat2s[:common,:])
 a = cat2s[:common,:]
@@ -60,7 +65,10 @@ for idx in itertools.combinations(range(common), 3):
     # if scale R > reject_scale, reject
     if tng[5] < reject_scale:
         tl2.append(tng)
+    else:
+        print 'reject'
 
+print 'expected', common * (common - 1) * (common - 2 ) / 6
 print len(tl1), len(tl2)
 
 first = tl1[0]
@@ -76,6 +84,7 @@ def naive_match(tg1, tg2):
     tC2 = tg2[8]
 
     sen1 = (R1 - R2)**2 - tR1**2 - tR2**2
+    # print 'sen1', sen1
 
     if sen1 > 0:
         return None
@@ -84,6 +93,7 @@ def naive_match(tg1, tg2):
 
     if sen2 > 0:
         return None
+    # print 'sen2', sen2
 
     return sen1, sen2
 

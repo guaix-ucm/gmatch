@@ -1,5 +1,9 @@
-import numpy as np
 import math
+import collections
+
+import numpy as np
+
+Triangle = collections.namedtuple('Triangle', ['v1', 'v2', 'v3', 'logp', 'hel', 'R', 'tR', 'C', 'tC'])
 
 def norma(x):
     n = np.sqrt(np.dot(x, x.conj()))
@@ -16,20 +20,11 @@ def create_triang(v, ep=1e-3):
     ll = [(ni, ai, idx, (idx + 1) % 3) for ni, ai, idx in zip(n, a, range(3))]
     ls = sorted(ll)
     sides, aristas, idxs, nidxs = zip(*ls)
-#    print sides
-#    print aristas
-#    print idxs
 
     ov = v[idxs, :]
-#    print 'order v'
-#    print ov
-#    print 'order a'
     oa = np.array(aristas)
-#    print oa
 
-#    print 'cross'
     e = np.cross(oa, [oa[1], oa[2], oa[0]])
-#    print e
 
     sg = np.sign(e)
     if np.any(sg != sg[0]):
@@ -40,7 +35,7 @@ def create_triang(v, ep=1e-3):
     tR = 2 * R * R * ep * ep * dep1
     tC = 2 * (1 - C**2) * ep**2 * dep1 + 3 * C**2 * ep**4 * dep1**2
 
-    return v[0], v[1], v[2], math.log(p), sg[0], R, tR, C, tC
+    return Triangle(v[0], v[1], v[2], math.log(p), sg[0], R, tR, C, tC)
 
 if __name__ == '__main__':
     # vertice
