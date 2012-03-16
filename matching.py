@@ -1,6 +1,8 @@
 import sys
-import numpy
 import math
+import itertools
+
+import numpy
 import scipy.spatial.distance as distance
 
 import triangle
@@ -15,8 +17,6 @@ def sort_by_mag(a):
     # http://stackoverflow.com/questions/2828059/sorting-arrays-in-numpy-by-column
     return a[a[:,2].argsort()]
 
-cat1s = sort_by_mag(cat1)
-cat2s = sort_by_mag(cat2)
 
 def normalize1(a):
     mi = a.min()
@@ -32,34 +32,34 @@ def normaliza(a):
 
     return b
 
+cat1s = sort_by_mag(cat1)
+cat2s = sort_by_mag(cat2)
 reject_scale = 10.0
 
 common = min(cat1s.shape[0], cat2s.shape[0])
-print common
+common = 5
+print 'Number of points', common
 
-a = normaliza(cat1s[:common,:])
+a = cat1s[:common,:]
 l = common
 tl1 = []
-for i in range(l):
-    for j in range(i + 1, l):
-        for k in range(j + 1, l):
-            r = a[[i,j,k], :]
-            tng = triangle.create_triang(r)
-            # if scale R > reject_scale, reject
-            if tng[5] < reject_scale:
-                tl1.append(tng)
+for idx in itertools.combinations(range(common), 3):
+    r = a[idx, :]
+    tng = triangle.create_triang(r)
+    # if scale R > reject_scale, reject
+    if tng[5] < reject_scale:
+        tl1.append(tng)
 
-a = normaliza(cat2s[:common,:])
+#a = normaliza(cat2s[:common,:])
+a = cat2s[:common,:]
 l = common
 tl2 = []
-for i in range(l):
-    for j in range(i + 1, l):
-        for k in range(j + 1, l):
-            r = a[[i,j,k], :]
-            tng = triangle.create_triang(r)
-            # if scale R > reject_scale, reject
-            if tng[5] < reject_scale:
-                tl2.append(tng)
+for idx in itertools.combinations(range(common), 3):
+    r = a[idx, :]
+    tng = triangle.create_triang(r)
+    # if scale R > reject_scale, reject
+    if tng[5] < reject_scale:
+        tl2.append(tng)
 
 print len(tl1), len(tl2)
 
@@ -92,4 +92,5 @@ for first in tl1:
     for tl in tl2:
         m = naive_match(first, tl)
         if m is not None:
-            print m
+            print 't1=',first
+            print 't2=',tl

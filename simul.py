@@ -32,10 +32,14 @@ lista[:,2] = mags
 # Catalog1
 idx = (50 < lista[:,0]) & (lista[:,0] < 150) & (50 < lista[:,1]) & (lista[:,1] < 150)
 
+ll = lista[idx]
+ll[:,0] -= 50
+ll[:,1] -= 50
+
 with open('cat1.txt', 'w') as fd:
-    numpy.savetxt(fd, lista[idx], fmt="%5.2f")
+    numpy.savetxt(fd, ll, fmt="%5.2f")
 
 # Catalog2
-idx = (53 < lista[:,0]) & (lista[:,0] < 153) & (55 < lista[:,1]) & (lista[:,1] < 155)
+idx = (0 < lista[:,0]) & (lista[:,0] < 100) & (0 < lista[:,1]) & (lista[:,1] < 100)
 with open('cat2.txt', 'w') as fd:
     numpy.savetxt(fd, lista[idx], fmt="%5.2f")
