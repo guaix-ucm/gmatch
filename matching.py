@@ -3,6 +3,8 @@ import numpy
 import math
 import scipy.spatial.distance as distance
 
+import triangle
+
 with open('cat1.txt') as fd:
     cat1 = numpy.loadtxt(fd)
 
@@ -31,6 +33,7 @@ def normaliza(a):
     return b
 
 def build(a1, a2, a3):
+    print a1, a2, a3
     idx = ["12", "13", "23"]
     r = numpy.array([a1, a2, a3])
 
@@ -50,12 +53,14 @@ def build(a1, a2, a3):
 
 a = normaliza(cat1s)
 l = cat1s.shape[0]
+tl = []
 for i in range(l):
     for j in range(i + 1, l):
         for k in range(j + 1, l):
-            build(a[i],a[j], a[k])
-            break
+            r = a[[i,j,k], :]
+            tl.append(triangle.create_triang(r))
 
+print len(tl)
 
 
 #print normaliza(cat1s)
