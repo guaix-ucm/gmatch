@@ -41,32 +41,10 @@ common = min(cat1s.shape[0], cat2s.shape[0])
 print 'Number of points', common
 
 a = cat1s[:common,:]
-l = common
-tl1 = []
-for idx in itertools.combinations(range(common), 3):
-    r = a[idx, :]
-    tng = triangle.create_triang(r)
-    # if scale R > reject_scale, reject
-    if tng[5] < reject_scale:
-        tl1.append(tng)
-    else:
-        print 'reject'
+tl1 = list(triangle.create_triang(a, common))
 
-for tl in tl1:
-    print tl
-
-#a = normaliza(cat2s[:common,:])
 a = cat2s[:common,:]
-l = common
-tl2 = []
-for idx in itertools.combinations(range(common), 3):
-    r = a[idx, :]
-    tng = triangle.create_triang(r)
-    # if scale R > reject_scale, reject
-    if tng[5] < reject_scale:
-        tl2.append(tng)
-    else:
-        print 'reject'
+tl2 = list(triangle.create_triang(a, common))
 
 print 'expected', common * (common - 1) * (common - 2 ) / 6
 print len(tl1), len(tl2)

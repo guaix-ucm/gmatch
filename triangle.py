@@ -1,5 +1,6 @@
 import math
 import collections
+import itertools
 
 import numpy as np
 
@@ -9,8 +10,14 @@ def norma(x):
     n = np.sqrt(np.dot(x, x.conj()))
     return n
 
+def create_triang(vlist, many, reject_scale=10, ep=1e-3):
+    for idx in itertools.combinations(range(many), 3):
+        t = create_triang_(vlist, idx, reject_scale, ep)
+        if t[5] < reject_scale:
+            yield t
 
-def create_triang(v, ep=1e-3):
+def create_triang_(vlist, idx, reject_scale=10, ep=1e-3):
+    v = vlist[idx, :]
     # aristas
     a = v[[1,2,0], 0:2] - v[:, 0:2] # 1-0, 2-1, 0-2
     # normas de las aristas
