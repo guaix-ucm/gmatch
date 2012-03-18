@@ -4,7 +4,7 @@ import itertools
 
 import numpy as np
 
-Triangle = collections.namedtuple('Triangle', ['v1', 'v2', 'v3', 'logp', 'hel', 'R', 'tR', 'C', 'tC'])
+Triangle = collections.namedtuple('Triangle', ['v0', 'v1', 'v2', 'i0', 'i1', 'i2', 'logp', 'hel', 'R', 'tR', 'C', 'tC'])
 
 def norma(x):
     n = np.sqrt(np.dot(x, x.conj()))
@@ -12,19 +12,20 @@ def norma(x):
 
 def create_triang(vlist, many, reject_scale=10, ep=1e-3):
     for idx in itertools.combinations(range(many), 3):
-        t = create_triang_(vlist, idx, reject_scale, ep)
+        t = create_triang_(vlist, idx, ep)
         if t[5] < reject_scale:
             yield t
 
-def create_triang_(vlist, idx, reject_scale=10, ep=1e-3):
+def create_triang_(vlist, idx, ep=1e-3):
     v = vlist[idx, :]
+    print idx
     # aristas
     a = v[[1,2,0], 0:2] - v[:, 0:2] # 1-0, 2-1, 0-2
     # normas de las aristas
     n = [norma(ar) for ar in a]
     # perimetro
     p = sum(n)
-    ll = [(ni, ai, idx, (idx + 1) % 3) for ni, ai, idx in zip(n, a, range(3))]
+    ll = [(ni, ai, ids, (ids + 1) % 3) for ni, ai, ids in zip(n, a, range(3))]
     ls = sorted(ll)
     sides, aristas, idxs, nidxs = zip(*ls)
 
@@ -42,7 +43,7 @@ def create_triang_(vlist, idx, reject_scale=10, ep=1e-3):
     tR = 2 * R * R * ep * ep * dep1
     tC = 2 * (1 - C**2) * ep**2 * dep1 + 3 * C**2 * ep**4 * dep1**2
 
-    return Triangle(v[0], v[1], v[2], math.log(p), sg[0], R, tR, C, tC)
+    return Triangle(v[0], v[1], v[2], idx[0], idx[1], idx[2], math.log(p), sg[0], R, tR, C, tC)
 
 if __name__ == '__main__':
     # vertice
