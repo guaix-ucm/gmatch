@@ -6,9 +6,31 @@ import numpy as np
 
 Triangle = collections.namedtuple('Triangle', ['v0', 'v1', 'v2', 'i0', 'i1', 'i2', 'logp', 'hel', 'R', 'tR', 'C', 'tC'])
 
+MatchedTriangles = collections.namedtuple('MatchedTriangles', ['t0', 't1', 'hel', 'logm'])
+
 def norma(x):
     n = np.sqrt(np.dot(x, x.conj()))
     return n
+
+def match_triang(t1, t2):
+
+    def mr(t1, t2):
+        return (t1.R - t2.R)**2 - t1.tR**2 - t2.tR**2
+    def mc(t1, t2):
+        return (t1.C - t2.C)**2 - t1.tC**2 - t2.tC**2
+
+    sen1 = mr(t1, t2)
+
+    if sen1 > 0:
+        return None
+
+    sen2 = mc(t1, t2)
+
+    if sen2 > 0:
+        return None
+
+    return MatchedTriangles(t1, t2, t1.hel * t2.hel, t1.logp - t2.logp)
+    
 
 def create_triang(vlist, many, reject_scale=10, ep=1e-3):
     for idx in itertools.combinations(range(many), 3):

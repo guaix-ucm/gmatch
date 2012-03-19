@@ -79,5 +79,10 @@ print 'done'
 
 dis, indices = r
 
+maxidx = len(tl1)
 print len(indices)
 print indices
+for a,b in zip(tl2, indices):
+    if b < maxidx:
+        mt = triangle.match_triang(a, tl1[b])
+        print mt
