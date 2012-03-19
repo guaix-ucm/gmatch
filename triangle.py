@@ -13,12 +13,11 @@ def norma(x):
 def create_triang(vlist, many, reject_scale=10, ep=1e-3):
     for idx in itertools.combinations(range(many), 3):
         t = create_triang_(vlist, idx, ep)
-        if t[5] < reject_scale:
+        if t.R < reject_scale:
             yield t
 
 def create_triang_(vlist, idx, ep=1e-3):
     v = vlist[idx, :]
-    print idx
     # aristas
     a = v[[1,2,0], 0:2] - v[:, 0:2] # 1-0, 2-1, 0-2
     # normas de las aristas
