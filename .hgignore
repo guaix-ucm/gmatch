@@ -3,6 +3,7 @@ syntax: glob
 
 *.pyc
 *~
+*.swp
 
 # switch to regexp syntax.
 syntax: regexp
