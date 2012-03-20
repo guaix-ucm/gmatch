@@ -34,6 +34,7 @@ def votes(matches, catsize):
     vmx = vot.max()
     if vmx <= 0:
         print 'no match'
+        return []
     
     sortv = np.argsort(vot, axis=None)
     id0, id1 = np.unravel_index(sortv[::-1], (nm, nm))
@@ -82,6 +83,7 @@ def clean_matches(matches):
             elif match.hel < 0:
                 nm -= 1
             else:
+                print 'hel must not be 0'
                 break
             logm.append(match.logm)
 
@@ -116,10 +118,9 @@ def clean_matches(matches):
         nnmatches = len(newmatches)
         print 'matches are', nnmatches
 
-        if nmatches == nnmatches:
-            matches = newmatches
-            break
         matches = newmatches
+        if nmatches == nnmatches:
+            break
 
 
     return matches
