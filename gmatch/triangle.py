@@ -1,6 +1,7 @@
 import math
 import collections
 import itertools
+import logging
 
 import numpy as np
 
@@ -33,7 +34,7 @@ def votes(matches, catsize):
 
     vmx = vot.max()
     if vmx <= 0:
-        print 'no match'
+        logging.debug('no match')
         return []
     
     sortv = np.argsort(vot, axis=None)
@@ -42,16 +43,16 @@ def votes(matches, catsize):
         val = vot[i,j]
         if val <= 0:
             # votes are 0
-            print 'votes are 0, ending'
+            logging.info('votes are 0, ending')
             break
             
         if 2 * val < vmx:
-            print 'votes are a half of the maximum, ending'
+            logging.info('votes are a half of the maximum, ending')
             # votes are a half of the maximum
             break
         if pair[i,0] != -1 or pair[j,1] != -1:
             # the point is already matched
-            print 'point',i,j,'already matched, ending'
+            logging.info('point %i%i already matched, ending', i, j)
             break
 
         pair[i,0] = j
@@ -83,47 +84,80 @@ def clean_matches(matches):
             elif match.hel < 0:
                 nm -= 1
             else:
-                print 'hel must not be 0'
+                logging.info('hel must not be 0')
                 break
             logm.append(match.logm)
 
-        print 'n+ is', npl
-        print 'n- is', nm
+        logging.info('n+ is %i', npl)
+        logging.info('n- is %i', nm)
 
         mt = abs(npl - nm)
         mf = npl + nm - mt
 
         scale = _scale_factor(mf, mt)
-        print 'scale factor is', scale
+        logging.info('scale factor is %f', scale)
 
         lgmrr = np.array(logm)
 
         med = lgmrr.mean()
         std = lgmrr.std()
 
-        print 'log M, average=',med, ' std=',std
+        logging.info('log M, average=%f std=%f', med, std)
 
         if std == 0:
-            print 'std is 0, end matching'
+            logging.info('std is 0, end matching')
             break
 
         newmatches = []
-        print 'removing false matches due to scale'
+        logging.info('removing false matches due to scale')
         for match in matches:
             z = (match.logm - med ) / (scale * std)
             if -1 <= z <= 1:
                 newmatches.append(match)
 
-        print 'matches were', nmatches
+        logging.info('matches were %i', nmatches)
         nnmatches = len(newmatches)
-        print 'matches are', nnmatches
+        logging.info('matches are %i', nnmatches)
 
         matches = newmatches
         if nmatches == nnmatches:
             break
-
+        nmatches = nnmatches
 
     return matches
+
+def match_triangs(t1, lt):
+
+    def mr(t1, t2):
+        return (t1.R - t2.R)**2 - t1.tR**2 - t2.tR**2
+
+    def mc(t1, t2):
+        return (t1.C - t2.C)**2 - t1.tC**2 - t2.tC**2
+
+    def distance(t1, t2):
+        return (t1.R - t2.R)**2 + (t1.C - t2.C)**2
+
+    matched = []
+
+    for t2 in lt:
+        sen1 = mr(t1, t2)
+
+        if sen1 > 0:
+            continue
+
+        sen2 = mc(t1, t2)
+
+        if sen2 > 0:
+            continue
+
+        matched.append((distance(t1, t2), t2))
+
+    if not matched:
+        return None
+
+    dm, tm = min(matched)
+
+    return MatchedTriangles(t1, tm, t1.hel * tm.hel, t1.logp - tm.logp)
 
 def match_triang(t1, t2):
 
@@ -170,7 +204,7 @@ def create_triang_(vlist, idx, ep=1e-3):
 
     sg = np.sign(e)
     if np.any(sg != sg[0]):
-        print 'reorder'
+        logging.info('reorder')
     R = sides[2] / sides[0]
     C = np.dot(oa[0], oa[2]) / (sides[2] * sides[0])
     dep1 = (1.0 / (sides[2])**2 + 1.0 / sides[0]**2 - C / (sides[2] * sides[0]))
@@ -179,9 +213,3 @@ def create_triang_(vlist, idx, ep=1e-3):
 
     return Triangle(v[0], v[1], v[2], idx[0], idx[1], idx[2], math.log(p), sg[0], R, tR, C, tC)
 
-if __name__ == '__main__':
-    # vertice
-    v = np.array([[0.16090669, 0.40127186,  15.25      ],
-    [0.95456394,   0.90577636,  16.01      ],
-    [0.21223826,   0.02564918,  16.14      ]])
-    print create_triang(v, ep=1e-3)
