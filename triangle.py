@@ -12,6 +12,64 @@ def norma(x):
     n = np.sqrt(np.dot(x, x.conj()))
     return n
 
+def _scale_factor(mf, mt):
+    scale = 0
+    if mf > mt:
+        scale = 1
+    elif 0.1 * mt > mf:
+        scale = 3
+    else:
+        scale = 2
+    return scale
+
+def clean_matches(matches):
+
+    nmatches = len(matches)
+    nnmatches = nmatches
+
+    while True:
+        npl = nm = 0
+        logm = []
+        for match in matches:
+            if match.hel > 0:
+                npl += 1
+            elif match.hel < 0:
+                nm -= 1
+            else:
+                break
+            logm.append(match.logm)
+
+        mt = abs(npl - nm)
+        mf = npl + nm - mt
+
+        scale = _scale_factor(mf, mt)
+
+        lgmrr = np.array(logm)
+
+        med = lgmrr.mean()
+        std = lgmrr.std()
+
+        print med, std
+
+        if std == 0:
+            break
+
+        newmatch = []
+        for match in matches:
+            z = (match.logm - med ) / (scale * std)
+            print z
+            if -1 <= z <= 1:
+                newmatch.append(match)
+
+        nnmatches = len(newmatch)
+
+        if nmatches == nnmatches:
+            matches = newmatches
+            break
+
+
+    return matches
+
 def match_triang(t1, t2):
 
     def mr(t1, t2):
