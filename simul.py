@@ -19,8 +19,6 @@ class Expo(object):
 
 e = Expo(12, 20, 1)
 
-
-
 mags = numpy.random.random(200)
 mags = e(mags)
 

@@ -31,24 +31,26 @@ def votes(matches, catsize):
         vot[t0.i1, t1.i1] += 1
         vot[t0.i2, t1.i2] += 1
 
-    print vot.shape
     vmx = vot.max()
-    print vmx
     if vmx <= 0:
         print 'no match'
     
-    print vot.min()
     sortv = np.argsort(vot, axis=None)
     id0, id1 = np.unravel_index(sortv[::-1], (nm, nm))
     for i,j in zip(id0, id1):
         val = vot[i,j]
+        if val <= 0:
+            # votes are 0
+            print 'votes are 0, ending'
+            break
+            
         if 2 * val < vmx:
-            print 'votes are a half of the maximum'
+            print 'votes are a half of the maximum, ending'
             # votes are a half of the maximum
             break
         if pair[i,0] != -1 or pair[j,1] != -1:
             # the point is already matched
-            print 'point',i,j,'already matched'
+            print 'point',i,j,'already matched, ending'
             break
 
         pair[i,0] = j
@@ -83,33 +85,41 @@ def clean_matches(matches):
                 break
             logm.append(match.logm)
 
+        print 'n+ is', npl
+        print 'n- is', nm
+
         mt = abs(npl - nm)
         mf = npl + nm - mt
 
         scale = _scale_factor(mf, mt)
+        print 'scale factor is', scale
 
         lgmrr = np.array(logm)
 
         med = lgmrr.mean()
         std = lgmrr.std()
 
-        print med, std
+        print 'log M, average=',med, ' std=',std
 
         if std == 0:
+            print 'std is 0, end matching'
             break
 
-        newmatch = []
+        newmatches = []
+        print 'removing false matches due to scale'
         for match in matches:
             z = (match.logm - med ) / (scale * std)
-            print z
             if -1 <= z <= 1:
-                newmatch.append(match)
+                newmatches.append(match)
 
-        nnmatches = len(newmatch)
+        print 'matches were', nmatches
+        nnmatches = len(newmatches)
+        print 'matches are', nnmatches
 
         if nmatches == nnmatches:
             matches = newmatches
             break
+        matches = newmatches
 
 
     return matches
