@@ -90,4 +90,5 @@ for a,b in zip(tl2, indices):
             matches1.append(mt)
 
 matches = triangle.clean_matches(matches1)
-triangle.votes(matches, common)
+pm = triangle.votes(matches, common)
+print sorted(pm)

@@ -18,6 +18,10 @@ def votes(matches, catsize):
     nm = catsize
 
     vot = np.zeros((nm, nm), dtype='int')
+    pair = np.empty((nm,2), dtype='int')
+    pair.fill(-1)
+
+    result = []
 
     for m in matches:
         t0 = m.t0
@@ -36,8 +40,21 @@ def votes(matches, catsize):
     print vot.min()
     sortv = np.argsort(vot, axis=None)
     id0, id1 = np.unravel_index(sortv[::-1], (nm, nm))
-    print id0
-    print id1
+    for i,j in zip(id0, id1):
+        val = vot[i,j]
+        if 2 * val < vmx:
+            print 'votes are a half of the maximum'
+            # votes are a half of the maximum
+            break
+        if pair[i,0] != -1 or pair[j,1] != -1:
+            # the point is already matched
+            print 'point',i,j,'already matched'
+            break
+
+        pair[i,0] = j
+        pair[j,1] = i
+        result.append((i, j))
+    return result
 
 def _scale_factor(mf, mt):
     scale = 0
