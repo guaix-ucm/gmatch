@@ -12,6 +12,33 @@ def norma(x):
     n = np.sqrt(np.dot(x, x.conj()))
     return n
 
+def votes(matches, catsize):
+
+    # shape of the catalogues, not of the mactches
+    nm = catsize
+
+    vot = np.zeros((nm, nm), dtype='int')
+
+    for m in matches:
+        t0 = m.t0
+        t1 = m.t1
+
+        vot[t0.i0, t1.i0] += 1
+        vot[t0.i1, t1.i1] += 1
+        vot[t0.i2, t1.i2] += 1
+
+    print vot.shape
+    vmx = vot.max()
+    print vmx
+    if vmx <= 0:
+        print 'no match'
+    
+    print vot.min()
+    sortv = np.argsort(vot, axis=None)
+    id0, id1 = np.unravel_index(sortv[::-1], (nm, nm))
+    print id0
+    print id1
+
 def _scale_factor(mf, mt):
     scale = 0
     if mf > mt:
