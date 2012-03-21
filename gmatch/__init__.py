@@ -30,6 +30,8 @@ from scipy.spatial import KDTree
 
 import triangle
 
+_logger = logging.getLogger('gmatch')
+
 def normalize1(a):
     mi = a.min()
     mx = a.max()
@@ -49,53 +51,54 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
     if nmatch is not None:
         common = min(nmatch, common)
 
-    logging.info('common number of points %i', common)
+    _logger.info('common number of points %i', common)
 
-    logging.info('generating triangles in catalogue 1')
+    _logger.info('generating triangles in catalogue 1')
     a = normalize(cat1s[:common,:])
     tl1 = list(triangle.create_triang(a, common, reject_scale=reject_scale))
 
-    logging.info('generating triangles in catalogue 2')
+    _logger.info('generating triangles in catalogue 2')
     a = normalize(cat2s[:common,:])
     tl2 = list(triangle.create_triang(a, common, reject_scale=reject_scale))
 
-    logging.info('expected triangles %i', common * (common - 1) * (common - 2 ) / 6)
-    logging.info('created triangles', 'cat1: %i cat2: %i', len(tl1), len(tl2))
+    _logger.info('expected triangles %i', common * (common - 1) * (common - 2 ) / 6)
+    _logger.info('created triangles', 'cat1: %i cat2: %i', len(tl1), len(tl2))
 
     mrt1 = max(tl1, key=operator.attrgetter('tR'))
     mct1 = max(tl1, key=operator.attrgetter('tC'))
-    logging.info('max R tolerance 1 %f', mrt1.tR)
-    logging.info('max C tolerance 1 %f', mct1.tC)
+    _logger.info('max R tolerance 1 %f', mrt1.tR)
+    _logger.info('max C tolerance 1 %f', mct1.tC)
     mrt2 = max(tl2, key=operator.attrgetter('tR'))
     mct2 = max(tl2, key=operator.attrgetter('tC'))
-    logging.info('max R tolerance 2 %f', mrt2.tR)
-    logging.info('max C tolerance 2 %f',mct2.tC)
+    _logger.info('max R tolerance 2 %f', mrt2.tR)
+    _logger.info('max C tolerance 2 %f',mct2.tC)
 
     maxR = math.sqrt(mrt1.tR**2 + mrt2.tR**2)
     maxC = math.sqrt(mct1.tC**2 + mct2.tC**2)
     maxdis = math.sqrt(maxR**2 + maxC**2)
-    logging.info('max query tolerance in R space', maxR)
-    logging.info('max query tolerance in C space', maxC)
-    logging.info('max query tolerance in R-C space', maxdis)
+    _logger.info('max query tolerance in R space', maxR)
+    _logger.info('max query tolerance in C space', maxC)
+    _logger.info('max query tolerance in R-C space', maxdis)
 
-    logging.info('spliting R and C in catalogues')
+    _logger.info('spliting R and C in catalogues')
     tspace1 = numpy.array([[tl.R, tl.C] for tl in tl1])
     tspace2 = numpy.array([[tl.R, tl.C] for tl in tl2])
 
-    for c,v in zip(tl1, tl2):
-        logging.info(c,v)
+    if _logger.isEnabledFor(logging.DEBUG):
+        for c,v in zip(tl1, tl2):
+            _logger.debug('%s %s',c,v)
 
-    logging.info('create kdtree...', end=' ')
+    _logger.info('create kdtree...')
     kdtree = KDTree(tspace1)
-    logging.info('done')
+    _logger.info('done')
 
-    logging.info('query in tree...', end=' ')
+    _logger.info('query in tree...')
     r = kdtree.query_ball_point(tspace2, r=maxdis)
     # r is an array of lists
-    logging.info('done')
+    _logger.info('done')
     
     matches1 = []
-    logging.info('checking matches')
+    _logger.info('checking matches')
     for i, l in numpy.ndenumerate(r):
         i0 = i[0]
         t2 = tl2[i0]
@@ -104,14 +107,14 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
         if mm:
             matches1.append(mm)
     
-    logging.info('we have', len(matches1),'matches')
-    logging.info('filtering matches')
+    _logger.info('we have %i matches', len(matches1))
+    _logger.info('filtering matches')
     matches = triangle.clean_matches(matches1)
-    logging.info('voting')
+    _logger.info('voting')
     pm = triangle.votes(matches, common)
 
     if len(pm) < common:
-        logging.info('we should start over')
+        _logger.info('we should start over')
 
     return pm
 

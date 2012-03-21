@@ -11,6 +11,8 @@ sys.path.append("..")
 
 from gmatch import matching
 
+logging.basicConfig(level=logging.DEBUG)
+
 with open('cat1.txt') as fd:
     cat1 = numpy.loadtxt(fd)
 

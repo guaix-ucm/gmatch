@@ -24,6 +24,8 @@ import logging
 
 import numpy as np
 
+_logger = logging.getLogger('gmatch')
+
 Triangle = collections.namedtuple('Triangle', ['v0', 'v1', 'v2', 'i0', 'i1', 'i2', 'logp', 'hel', 'R', 'tR', 'C', 'tC'])
 
 MatchedTriangles = collections.namedtuple('MatchedTriangles', ['t0', 't1', 'hel', 'logm'])
@@ -53,7 +55,7 @@ def votes(matches, catsize):
 
     vmx = vot.max()
     if vmx <= 0:
-        logging.debug('no match')
+        _logger.debug('no match')
         return []
     
     sortv = np.argsort(vot, axis=None)
@@ -62,16 +64,16 @@ def votes(matches, catsize):
         val = vot[i,j]
         if val <= 0:
             # votes are 0
-            logging.info('votes are 0, ending')
+            _logger.info('votes are 0, ending')
             break
             
         if 2 * val < vmx:
-            logging.info('votes are a half of the maximum, ending')
+            _logger.info('votes are a half of the maximum, ending')
             # votes are a half of the maximum
             break
         if pair[i,0] != -1 or pair[j,1] != -1:
             # the point is already matched
-            logging.info('point %i%i already matched, ending', i, j)
+            _logger.info('point %i%i already matched, ending', i, j)
             break
 
         pair[i,0] = j
@@ -103,40 +105,40 @@ def clean_matches(matches):
             elif match.hel < 0:
                 nm -= 1
             else:
-                logging.info('hel must not be 0')
+                _logger.info('hel must not be 0')
                 break
             logm.append(match.logm)
 
-        logging.info('n+ is %i', npl)
-        logging.info('n- is %i', nm)
+        _logger.info('n+ is %i', npl)
+        _logger.info('n- is %i', nm)
 
         mt = abs(npl - nm)
         mf = npl + nm - mt
 
         scale = _scale_factor(mf, mt)
-        logging.info('scale factor is %f', scale)
+        _logger.info('scale factor is %f', scale)
 
         lgmrr = np.array(logm)
 
         med = lgmrr.mean()
         std = lgmrr.std()
 
-        logging.info('log M, average=%f std=%f', med, std)
+        _logger.info('log M, average=%f std=%f', med, std)
 
         if std == 0:
-            logging.info('std is 0, end matching')
+            _logger.info('std is 0, end matching')
             break
 
         newmatches = []
-        logging.info('removing false matches due to scale')
+        _logger.info('removing false matches due to scale')
         for match in matches:
             z = (match.logm - med ) / (scale * std)
             if -1 <= z <= 1:
                 newmatches.append(match)
 
-        logging.info('matches were %i', nmatches)
+        _logger.info('matches were %i', nmatches)
         nnmatches = len(newmatches)
-        logging.info('matches are %i', nnmatches)
+        _logger.info('matches are %i', nnmatches)
 
         matches = newmatches
         if nmatches == nnmatches:
@@ -223,7 +225,7 @@ def create_triang_(vlist, idx, ep=1e-3):
 
     sg = np.sign(e)
     if np.any(sg != sg[0]):
-        logging.info('reorder')
+        _logger.info('reorder')
     R = sides[2] / sides[0]
     C = np.dot(oa[0], oa[2]) / (sides[2] * sides[0])
     dep1 = (1.0 / (sides[2])**2 + 1.0 / sides[0]**2 - C / (sides[2] * sides[0]))
