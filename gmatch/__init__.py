@@ -62,40 +62,37 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
     tl2 = list(triangle.create_triang(a, common, reject_scale=reject_scale))
 
     _logger.info('expected triangles %i', common * (common - 1) * (common - 2 ) / 6)
-    _logger.info('created triangles', 'cat1: %i cat2: %i', len(tl1), len(tl2))
+    _logger.info('created triangles cat1: %i cat2: %i', len(tl1), len(tl2))
 
     mrt1 = max(tl1, key=operator.attrgetter('tR'))
     mct1 = max(tl1, key=operator.attrgetter('tC'))
-    _logger.info('max R tolerance 1 %f', mrt1.tR)
-    _logger.info('max C tolerance 1 %f', mct1.tC)
+    _logger.debug('max R tolerance 1 %f', mrt1.tR)
+    _logger.debug('max C tolerance 1 %f', mct1.tC)
     mrt2 = max(tl2, key=operator.attrgetter('tR'))
     mct2 = max(tl2, key=operator.attrgetter('tC'))
-    _logger.info('max R tolerance 2 %f', mrt2.tR)
-    _logger.info('max C tolerance 2 %f',mct2.tC)
+    _logger.debug('max R tolerance 2 %f', mrt2.tR)
+    _logger.debug('max C tolerance 2 %f',mct2.tC)
 
     maxR = math.sqrt(mrt1.tR**2 + mrt2.tR**2)
     maxC = math.sqrt(mct1.tC**2 + mct2.tC**2)
     maxdis = math.sqrt(maxR**2 + maxC**2)
-    _logger.info('max query tolerance in R space', maxR)
-    _logger.info('max query tolerance in C space', maxC)
-    _logger.info('max query tolerance in R-C space', maxdis)
+    _logger.info('max query tolerance in R space %f', maxR)
+    _logger.info('max query tolerance in C space %f', maxC)
+    _logger.info('max query tolerance in R-C space %f', maxdis)
 
     _logger.info('spliting R and C in catalogues')
     tspace1 = numpy.array([[tl.R, tl.C] for tl in tl1])
     tspace2 = numpy.array([[tl.R, tl.C] for tl in tl2])
 
-    if _logger.isEnabledFor(logging.DEBUG):
-        for c,v in zip(tl1, tl2):
-            _logger.debug('%s %s',c,v)
-
-    _logger.info('create kdtree...')
+    _logger.info('finding closer triangles')
+    _logger.debug('create kdtree...')
     kdtree = KDTree(tspace1)
-    _logger.info('done')
+    _logger.debug('done')
 
-    _logger.info('query in tree...')
+    _logger.debug('query in tree...')
     r = kdtree.query_ball_point(tspace2, r=maxdis)
     # r is an array of lists
-    _logger.info('done')
+    _logger.debug('done')
     
     matches1 = []
     _logger.info('checking matches')

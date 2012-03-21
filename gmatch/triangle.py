@@ -35,12 +35,11 @@ def norma(x):
     return n
 
 def votes(matches, catsize):
+    # shape of the catalogues, not of the matches
 
-    # shape of the catalogues, not of the mactches
-    nm = catsize
-
-    vot = np.zeros((nm, nm), dtype='int')
-    pair = np.empty((nm,2), dtype='int')
+    vot = np.zeros((catsize, catsize), dtype='int')
+    pair = np.empty((catsize, 2), dtype='int')
+    # Empty flag
     pair.fill(-1)
 
     result = []
@@ -54,17 +53,18 @@ def votes(matches, catsize):
         vot[t0.i2, t1.i2] += 1
 
     vmx = vot.max()
+    _logger.debug('maximum voting count %i', vmx)
     if vmx <= 0:
-        _logger.debug('no match')
+        _logger.info('voting is 0, no match between catalogues')
         return []
     
     sortv = np.argsort(vot, axis=None)
-    id0, id1 = np.unravel_index(sortv[::-1], (nm, nm))
-    for i,j in zip(id0, id1):
-        val = vot[i,j]
+    id0, id1 = np.unravel_index(sortv[::-1], (catsize, catsize))
+    for i, j in zip(id0, id1):
+        val = vot[i, j]
         if val <= 0:
             # votes are 0
-            _logger.info('votes are 0, ending')
+            _logger.info('votes have reached 0 level, ending')
             break
             
         if 2 * val < vmx:
@@ -76,27 +76,24 @@ def votes(matches, catsize):
             _logger.info('point %i%i already matched, ending', i, j)
             break
 
+        _logger.debug('obj %i in cat1 is matched with obj %i in cat2', i, j)
         pair[i,0] = j
         pair[j,1] = i
         result.append((i, j))
     return result
 
 def _scale_factor(mf, mt):
-    scale = 0
     if mf > mt:
-        scale = 1
+        return 1
     elif 0.1 * mt > mf:
-        scale = 3
+        return 3
     else:
-        scale = 2
-    return scale
+        return 2
 
 def clean_matches(matches):
 
-    nmatches = len(matches)
-    nnmatches = nmatches
-
     while True:
+        nmatches = len(matches)
         npl = nm = 0
         logm = []
         for match in matches:
@@ -105,45 +102,48 @@ def clean_matches(matches):
             elif match.hel < 0:
                 nm += 1
             else:
-                _logger.info('hel must not be 0')
+                _logger.error('hel must not be 0')
                 break
             logm.append(match.logm)
 
-        _logger.info('n+ is %i', npl)
-        _logger.info('n- is %i', nm)
+        _logger.debug('n+ is %i', npl)
+        _logger.debug('n- is %i', nm)
 
         mt = abs(npl - nm)
         mf = npl + nm - mt
 
         scale = _scale_factor(mf, mt)
-        _logger.info('scale factor is %f', scale)
+        _logger.debug('scale factor is %f', scale)
 
         lgmrr = np.array(logm)
 
         med = lgmrr.mean()
         std = lgmrr.std()
 
-        _logger.info('log M, average=%f std=%f', med, std)
+        _logger.debug('log M, average=%g std=%g', med, std)
 
         if std == 0:
-            _logger.info('std is 0, end matching')
+            _logger.debug('std is 0, end matching')
             break
 
+        removed_matches = 0
         newmatches = []
         _logger.info('removing false matches due to scale')
         for match in matches:
             z = (match.logm - med ) / (scale * std)
             if -1 <= z <= 1:
                 newmatches.append(match)
+            else:
+                removed_matches += 1
 
         _logger.info('matches were %i', nmatches)
-        nnmatches = len(newmatches)
-        _logger.info('matches are %i', nnmatches)
+        _logger.info('rejected matches %i', removed_matches)
+        _logger.info('matches are %i', nmatches - removed_matches)
 
         matches = newmatches
-        if nmatches == nnmatches:
+        if removed_matches == 0:
+            _logger.info('finished filtering')
             break
-        nmatches = nnmatches
 
     return matches
 
