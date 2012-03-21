@@ -2,6 +2,8 @@
 import numpy
 import math
 
+numpy.random.seed(seed=232183)
+
 coords = numpy.random.random(400)
 
 coords.shape = (200, 2)
@@ -27,17 +29,24 @@ lista = numpy.zeros((200, 3))
 lista[:,0:2] = coords
 lista[:,2] = mags
 
-# Catalog1
-idx = (50 < lista[:,0]) & (lista[:,0] < 150) & (50 < lista[:,1]) & (lista[:,1] < 150)
+with open('master.txt', 'w') as fd:
+    numpy.savetxt(fd, lista, fmt="%f")
 
-ll = lista[idx]
-ll[:,0] -= 50
-ll[:,1] -= 50
+# Catalog1
+ll = []
+for i in lista:
+    if (0 < i[0] < 50) and (0 < i[1] < 50):
+        ll.append(i)
+ll = numpy.asarray(ll) - numpy.array([0, 0, 0])
 
 with open('cat1.txt', 'w') as fd:
-    numpy.savetxt(fd, ll, fmt="%5.2f")
+    numpy.savetxt(fd, ll, fmt="%f")
 
 # Catalog2
-idx = (0 < lista[:,0]) & (lista[:,0] < 100) & (0 < lista[:,1]) & (lista[:,1] < 100)
+ll = []
+for i in lista:
+    if (5 < i[0] < 50) and (5 < i[1] < 50):
+        ll.append(i)
+ll = numpy.asarray(ll) - numpy.array([5, 5, 0])
 with open('cat2.txt', 'w') as fd:
-    numpy.savetxt(fd, lista[idx], fmt="%5.2f")
+    numpy.savetxt(fd, ll, fmt="%f")
