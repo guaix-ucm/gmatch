@@ -11,7 +11,7 @@ sys.path.append("..")
 
 from gmatch import matching
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 with open('cat1.txt') as fd:
     cat1 = numpy.loadtxt(fd)
@@ -29,7 +29,7 @@ cat2s = sort_by_mag(cat2)
 reject_scale = 10.0
 eps = 1e-3
 
-pm = matching(cat1s[:], cat2s[:], nmatch=20, reject_scale=reject_scale)
+pm = matching(cat1s[:], cat2s[:], reject_scale=reject_scale)
     
 for a,b in pm:
     print(cat1s[a], cat2s[b])

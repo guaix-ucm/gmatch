@@ -32,37 +32,23 @@ import triangle
 
 _logger = logging.getLogger('gmatch')
 
-def normalize1(a):
-    mi = a.min()
-    mx = a.max()
-
-    a = (a - mi) / (mx - mi)
-    return a
-
-def normalize(a):
-    b = a.copy()
-    b[:,0] = normalize1(b[:,0])
-    b[:,1] = normalize1(b[:,1])
-
-    return b
-
-def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
-    common = min(cat1s.shape[0], cat2s.shape[0])
-    if nmatch is not None:
-        common = min(nmatch, common)
-
-    _logger.info('common number of points %i', common)
+def matching(cat1s, cat2s, reject_scale=10.0, eps=1e-3):
+    _logger.info('number of points cat1 %i', cat1s.shape[0])
+    _logger.info('number of points cat2 %i', cat2s.shape[0])
+    maxmatch = min(cat1s.shape[0], cat2s.shape[0])
+    _logger.info('maximum number of matches %i', maxmatch)
 
     _logger.info('generating triangles in catalogue 1')
-    a = normalize(cat1s[:common,:])
-    tl1 = list(triangle.create_triang(a, common, reject_scale=reject_scale))
+    tl1 = list(triangle.create_triang(cat1s, reject_scale=reject_scale))
+    c = cat1s.shape[0]
+    _logger.info('expected triangles %i', c * (c - 1) * (c - 2 ) / 6)
+    _logger.info('created triangles %i', len(tl1))
 
     _logger.info('generating triangles in catalogue 2')
-    a = normalize(cat2s[:common,:])
-    tl2 = list(triangle.create_triang(a, common, reject_scale=reject_scale))
-
-    _logger.info('expected triangles %i', common * (common - 1) * (common - 2 ) / 6)
-    _logger.info('created triangles cat1: %i cat2: %i', len(tl1), len(tl2))
+    tl2 = list(triangle.create_triang(cat2s, reject_scale=reject_scale))
+    c = cat2s.shape[0]
+    _logger.info('expected triangles %i', c * (c - 1) * (c - 2 ) / 6)
+    _logger.info('created triangles %i', len(tl2))
 
     mrt1 = max(tl1, key=operator.attrgetter('tR'))
     mct1 = max(tl1, key=operator.attrgetter('tC'))
@@ -71,7 +57,7 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
     mrt2 = max(tl2, key=operator.attrgetter('tR'))
     mct2 = max(tl2, key=operator.attrgetter('tC'))
     _logger.debug('max R tolerance 2 %f', mrt2.tR)
-    _logger.debug('max C tolerance 2 %f',mct2.tC)
+    _logger.debug('max C tolerance 2 %f', mct2.tC)
 
     maxR = math.sqrt(mrt1.tR**2 + mrt2.tR**2)
     maxC = math.sqrt(mct1.tC**2 + mct2.tC**2)
@@ -83,6 +69,11 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
     _logger.info('spliting R and C in catalogues')
     tspace1 = numpy.array([[tl.R, tl.C] for tl in tl1])
     tspace2 = numpy.array([[tl.R, tl.C] for tl in tl2])
+
+    #with open('t1.txt', 'w') as fd:
+    #    numpy.savetxt(fd, tspace1, fmt="%f")
+    #with open('t2.txt', 'w') as fd:
+    #    numpy.savetxt(fd, tspace2, fmt="%f")
 
     _logger.info('finding closer triangles')
     _logger.debug('create kdtree...')
@@ -113,9 +104,9 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
     _logger.info('filtering matches')
     matches = triangle.clean_matches(matches1)
     _logger.info('voting')
-    pm = triangle.votes(matches, common)
+    pm = triangle.votes(matches, cat1s.shape[0], cat2s.shape[0])
 
-    if len(pm) < common:
+    if len(pm) < maxmatch:
         _logger.info('we should start over')
 
     return pm

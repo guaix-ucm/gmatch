@@ -34,11 +34,11 @@ def norma(x):
     n = np.sqrt(np.dot(x, x.conj()))
     return n
 
-def votes(matches, catsize):
+def votes(matches, c1, c2):
     # shape of the catalogues, not of the matches
 
-    vot = np.zeros((catsize, catsize), dtype='int')
-    pair = np.empty((catsize, 2), dtype='int')
+    vot = np.zeros((c1, c2), dtype='int')
+    pair = np.empty((max(c1, c2), 2), dtype='int')
     # Empty flag
     pair.fill(-1)
 
@@ -59,7 +59,7 @@ def votes(matches, catsize):
         return []
     
     sortv = np.argsort(vot, axis=None)
-    id0, id1 = np.unravel_index(sortv[::-1], (catsize, catsize))
+    id0, id1 = np.unravel_index(sortv[::-1], (c1, c2))
     for i, j in zip(id0, id1):
         val = vot[i, j]
         if val <= 0:
@@ -204,8 +204,8 @@ def match_triang(t1, t2):
     return MatchedTriangles(t1, t2, t1.hel * t2.hel, t1.logp - t2.logp)
     
 
-def create_triang(vlist, many, reject_scale=10, ep=1e-3):
-    for idx in itertools.combinations(range(many), 3):
+def create_triang(vlist, reject_scale=10, ep=1e-3):
+    for idx in itertools.combinations(range(vlist.shape[0]), 3):
         t = create_triang_(vlist, idx, ep)
         if t.R < reject_scale:
             yield t
