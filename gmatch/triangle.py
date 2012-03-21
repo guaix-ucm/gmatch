@@ -173,6 +173,8 @@ def match_triangs(t1, lt):
 
         matched.append((distance(t1, t2), t2))
 
+    _logger.debug('trg has %i close neighbors', len(matched))
+
     if not matched:
         return None
 

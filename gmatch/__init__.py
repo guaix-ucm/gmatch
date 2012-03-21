@@ -100,11 +100,16 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
         i0 = i[0]
         t2 = tl2[i0]
         t1s = [tl1[i1] for i1 in l]
+        _logger.debug('trg %i in cat2 has %i neighbours', i0, len(t1s))
         mm = triangle.match_triangs(t2, t1s)
         if mm:
             matches1.append(mm)
     
     _logger.info('we have %i matches', len(matches1))
+    if not matches1:
+        _logger.info('no matches between the catalogues')
+        return []
+        
     _logger.info('filtering matches')
     matches = triangle.clean_matches(matches1)
     _logger.info('voting')
