@@ -103,7 +103,7 @@ def clean_matches(matches):
             if match.hel > 0:
                 npl += 1
             elif match.hel < 0:
-                nm -= 1
+                nm += 1
             else:
                 _logger.info('hel must not be 0')
                 break
