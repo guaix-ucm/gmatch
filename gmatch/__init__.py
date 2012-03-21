@@ -86,11 +86,11 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
 
     _logger.info('finding closer triangles')
     _logger.debug('create kdtree...')
-    kdtree = KDTree(tspace1)
+    kdtree = KDTree(tspace2)
     _logger.debug('done')
 
     _logger.debug('query in tree...')
-    r = kdtree.query_ball_point(tspace2, r=maxdis)
+    r = kdtree.query_ball_point(tspace1, r=maxdis)
     # r is an array of lists
     _logger.debug('done')
     
@@ -98,10 +98,10 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
     _logger.info('checking matches')
     for i, l in numpy.ndenumerate(r):
         i0 = i[0]
-        t2 = tl2[i0]
-        t1s = [tl1[i1] for i1 in l]
-        _logger.debug('trg %i in cat2 has %i neighbours', i0, len(t1s))
-        mm = triangle.match_triangs(t2, t1s)
+        t1 = tl1[i0]
+        t2s = [tl2[i1] for i1 in l]
+        _logger.debug('trg %i in cat1 has %i neighbours', i0, len(t2s))
+        mm = triangle.match_triangs(t1, t2s)
         if mm:
             matches1.append(mm)
     
