@@ -179,6 +179,8 @@ def match_triangs(t1, lt):
         return None
 
     dm, tm = min(matched)
+    _logger.debug('closest triangle is %s', tm)
+    _logger.debug('distance is %g', dm)
 
     return MatchedTriangles(t1, tm, t1.hel * tm.hel, t1.logp - tm.logp)
 
