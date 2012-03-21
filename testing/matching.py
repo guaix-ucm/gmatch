@@ -7,6 +7,8 @@ import logging
 
 import numpy
 
+sys.path.append("..") 
+
 from gmatch import matching
 
 with open('cat1.txt') as fd:

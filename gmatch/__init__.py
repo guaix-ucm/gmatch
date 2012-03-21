@@ -92,5 +92,8 @@ def matching(cat1s, cat2s, nmatch=None, reject_scale=10.0, eps=1e-3):
     logging.info('voting')
     pm = triangle.votes(matches, common)
 
+    if len(pm) < common:
+        logging.info('we should start over')
+
     return pm
 
