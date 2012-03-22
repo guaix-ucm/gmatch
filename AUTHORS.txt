@@ -1,0 +1,6 @@
+Gmatch matching package
+=======================
+
+Primary authors:
+
+ * Sergio Pascual <sergiopr@fis.ucm.es>
