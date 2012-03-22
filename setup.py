@@ -2,7 +2,7 @@
 from distutils.core import setup
 
 setup(name='gmatch',
-      version='1.0',
+      version='0.1.0',
       description='Match pairs of objects using Groth\'s algorithm',
       author='Sergio Pascual',
       author_email='sergiopr@fis.ucm.es',
