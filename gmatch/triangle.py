@@ -36,13 +36,10 @@ def norma(x):
 
 def votes(matches, c1, c2):
     # shape of the catalogues, not of the matches
-
     vot = np.zeros((c1, c2), dtype='int')
-    pair = np.empty((max(c1, c2), 2), dtype='int')
-    # Empty flag
-    pair.fill(-1)
-
-    result = []
+    # to store matched points  
+    lm1 = []
+    lm2 = []
 
     for m in matches:
         t0 = m.t0
@@ -56,7 +53,7 @@ def votes(matches, c1, c2):
     _logger.debug('maximum voting count %i', vmx)
     if vmx <= 0:
         _logger.info('voting is 0, no match between catalogues')
-        return []
+        return np.array([[]])
     
     sortv = np.argsort(vot, axis=None)
     id0, id1 = np.unravel_index(sortv[::-1], (c1, c2))
@@ -71,15 +68,16 @@ def votes(matches, c1, c2):
             _logger.info('votes are a half of the maximum, ending')
             # votes are a half of the maximum
             break
-        if pair[i,0] != -1 or pair[j,1] != -1:
+        if (i in lm1) or (j in lm2):
             # the point is already matched
-            _logger.info('point %i%i already matched, ending', i, j)
+            _logger.info('point %i %i already matched, ending', i, j)
             break
 
         _logger.debug('obj %i in cat1 is matched with obj %i in cat2', i, j)
-        pair[i,0] = j
-        pair[j,1] = i
-        result.append((i, j))
+        lm1.append(i)
+        lm2.append(j)
+
+    result = np.array([lm1, lm2]).T
     return result
 
 def _scale_factor(mf, mt):

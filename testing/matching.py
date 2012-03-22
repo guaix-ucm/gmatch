@@ -9,7 +9,7 @@ import numpy
 
 sys.path.append("..") 
 
-from gmatch import matching
+from gmatch import gmatch
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,7 +29,8 @@ cat2s = sort_by_mag(cat2)
 reject_scale = 10.0
 eps = 1e-3
 
-pm = matching(cat1s[:], cat2s[:], reject_scale=reject_scale)
-    
-for a,b in pm:
-    print(cat1s[a], cat2s[b])
+matches = gmatch(cat1s[:], cat2s[:], reject_scale=reject_scale, eps=eps)
+
+if matches is not None:
+    print matches[0]
+    print matches[1]

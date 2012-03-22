@@ -5,9 +5,7 @@ import math
 numpy.random.seed(seed=232183)
 
 coords = numpy.random.random(400)
-
 coords.shape = (200, 2)
-
 coords *= 200
 
 class Expo(object):
@@ -25,7 +23,6 @@ mags = numpy.random.random(200)
 mags = e(mags)
 
 lista = numpy.zeros((200, 3))
-
 lista[:,0:2] = coords
 lista[:,2] = mags
 
@@ -41,17 +38,18 @@ ll = numpy.asarray(ll) - numpy.array([0, 0, 0])
 
 with open('cat1.txt', 'w') as fd:
     numpy.savetxt(fd, ll, fmt="%f")
-s = 0.5
-t = math.pi
-rotation = numpy.array([[s * math.cos(t), s * math.sin(t), 0], 
-                        [-s * math.sin(t), s * math.cos(t), 0],
-                        [0,0,1]])
 
 # Catalog2
+coords = numpy.random.random(400)
+coords.shape = (200, 2)
+coords *= 200
+lista[:,0:2] = coords
+lista[:,2] = mags
+
 ll = []
 for i in lista:
     if (5 < i[0] < 55) and (5 < i[1] < 55):
-        ll.append(numpy.dot(rotation, i))
+        ll.append(i)
 ll = numpy.asarray(ll) - numpy.array([5, 5, 0])
 with open('cat2.txt', 'w') as fd:
     numpy.savetxt(fd, ll, fmt="%f")
