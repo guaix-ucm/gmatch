@@ -210,11 +210,12 @@ def create_triang(vlist, reject_scale=10, ep=1e-3):
 
 def create_triang_(vlist, idx, ep=1e-3):
     v = vlist[idx, :]
-    # aristas
+    # sides
+    # np.roll(v[:,0:2],shift=-1,axis=0)
     a = v[[1,2,0], 0:2] - v[:, 0:2] # 1-0, 2-1, 0-2
-    # normas de las aristas
+    # norms of the sides
     n = [norma(ar) for ar in a]
-    # perimetro
+    # perimeter
     p = sum(n)
     ll = [(ni, ai, ids, (ids + 1) % 3) for ni, ai, ids in zip(n, a, range(3))]
     ls = sorted(ll)
@@ -223,7 +224,8 @@ def create_triang_(vlist, idx, ep=1e-3):
     ov = v[idxs, :]
     oa = np.array(aristas)
 
-    e = np.cross(oa, [oa[1], oa[2], oa[0]])
+    # cross product of sides
+    e = np.cross(oa, np.roll(oa, shift=-1, axis=0))
 
     sg = np.sign(e)
     if np.any(sg != sg[0]):
